@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -95,12 +97,18 @@ public class ChatCliente {
     
     private void processaMensagens(){
         while(!Thread.currentThread().isInterrupted()){
+            synchronized(this){
+                try {
+                    Thread.currentThread().wait(900);
+                } catch (InterruptedException ex) {
+                    System.out.println(ex.getMessage());
+                }
+            }
             try {
                 BufferedReader buffer = new BufferedReader(new InputStreamReader(conexao.getInputStream(), "UTF8"));
                 if(buffer.ready()){
                     String mensagem = buffer.readLine();
                     callback.mensagemRecebida(mensagem);
-                    System.out.println("recebida...");
                 }
             } catch (IOException ex) {
                 callback.logCliente("[SISTEMA] Falha ao rec. mensagem: " + ex.getMessage(), LogTipo.LOG_ERRO);

@@ -78,9 +78,13 @@ public class ChatServidor {
         if(!portaValida(porta))
             throw new Exception("Porta Inválida");
         
-        servidor = new ServerSocket();
-        InetSocketAddress endereco = new InetSocketAddress(ip, porta);
-        servidor.bind(endereco);
+        if(ip.equals("localhost")){
+            servidor = new ServerSocket(porta);
+        }else{
+            servidor = new ServerSocket();
+            InetSocketAddress endereco = new InetSocketAddress(ip, porta);
+            servidor.bind(endereco);
+        }
         
         aceitaConexoes = new Thread(){
             @Override
@@ -162,6 +166,14 @@ public class ChatServidor {
             } catch (IOException ex) {
                 callback.logServidor("Falha ao ler mensagem: " + ex.getMessage(), LogTipo.LOG_ERRO);
             }
+            
+                synchronized(this){
+                    try {
+                        Thread.currentThread().wait(900);
+                    } catch (InterruptedException ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                }
         }
     }
     

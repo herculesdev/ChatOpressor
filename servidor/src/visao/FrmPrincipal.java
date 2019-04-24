@@ -45,7 +45,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
         jLabel1.setText("Endereço de IP");
 
-        txtIp.setText("127.0.0.1");
+        txtIp.setText("localhost");
 
         jLabel2.setText("Porta");
 
