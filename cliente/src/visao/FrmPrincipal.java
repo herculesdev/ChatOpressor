@@ -1,6 +1,7 @@
 package visao;
 
 import controlador.ControladorFrmPrincipal;
+import java.awt.event.KeyEvent;
 
 /**
  *
@@ -99,8 +100,18 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
         btnEnviar.setText("Enviar");
         btnEnviar.setEnabled(false);
+        btnEnviar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEnviarActionPerformed(evt);
+            }
+        });
 
         txtMensagem.setEnabled(false);
+        txtMensagem.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtMensagemKeyReleased(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -155,6 +166,14 @@ public class FrmPrincipal extends javax.swing.JFrame {
     private void btnConectarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConectarActionPerformed
         controlador.btnConectarActionPerformed(evt);
     }//GEN-LAST:event_btnConectarActionPerformed
+
+    private void btnEnviarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnviarActionPerformed
+        controlador.btnEnviarActionPerformed(evt);
+    }//GEN-LAST:event_btnEnviarActionPerformed
+
+    private void txtMensagemKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtMensagemKeyReleased
+        controlador.txtMensagemKeyReleased(evt);
+    }//GEN-LAST:event_txtMensagemKeyReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnConectar;
