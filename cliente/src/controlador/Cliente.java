@@ -1,4 +1,4 @@
-package controladores;
+package controlador;
 
 import visao.FrmPrincipal;
 
