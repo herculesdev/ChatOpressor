@@ -3,6 +3,8 @@ package controlador;
 import visao.FrmPrincipal;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import modelo.*;
 
 /**
@@ -22,12 +24,10 @@ public class ControladorFrmPrincipal implements IChatCallback{
     // Minhas
     private final int MODO_INICIADO = 0;
     private final int MODO_PARADO = 1;
-    private final int LOG_ERRO = 0;
-    private final int LOG_SUCESSO = 1;
-    private final int LOG_AVISO = 2;
     
     private int modoAtual = MODO_PARADO;
     public StringBuilder logBuffer = new StringBuilder();
+    ChatServidor servidor;
     
     public ControladorFrmPrincipal(JTextField txtIp, JTextField txtPorta, JTextField txtConexoes, JButton btnIniciar, JTextPane txtLog, FrmPrincipal form){
         this.txtIp = txtIp;
@@ -56,7 +56,7 @@ public class ControladorFrmPrincipal implements IChatCallback{
         }
     }
     
-    private void log(String mensagem, int tipo){
+    private void log(String mensagem, LogTipo tipo){
         String cor = "blue";
         switch(tipo){
             case LOG_ERRO:
@@ -68,8 +68,11 @@ public class ControladorFrmPrincipal implements IChatCallback{
             case LOG_AVISO:
                 cor= "orange";
                 break;
+            case LOG_NORMAL:
+                cor = "white";
+                break;
             default:
-                cor = "green";
+                cor = "white";
         }
         
         String abreTag = "<span style=color:" + cor + ">";
@@ -81,45 +84,80 @@ public class ControladorFrmPrincipal implements IChatCallback{
     }
     
     private void log(String mensagem){
-        log(mensagem, LOG_SUCESSO);
+        log(mensagem, LogTipo.LOG_SUCESSO);
     }
+    
+    private boolean estaIniciado(){
+        return (servidor != null);
+    }
+    
+    private void iniciar(){        
+        String ip = txtIp.getText();
+        int porta = Integer.parseInt(txtPorta.getText());
+        int max = Integer.parseInt(txtConexoes.getText());
+
+        if(!ChatServidor.ipValido(ip)){
+            return;
+        }
+        
+        if(!ChatServidor.ipValido(ip)){
+            return;
+        }
+        
+        log("# Iniciando na porta " + porta + "...", LogTipo.LOG_AVISO);
+        servidor = new ChatServidor(this);
+        try {
+            servidor.iniciar(ip, porta, max);
+            log("Iniciado!", LogTipo.LOG_SUCESSO);
+            modoInterface(MODO_INICIADO);
+        } catch (Exception ex) {
+            servidor = null;
+            log("Falha: " + ex.getMessage(), LogTipo.LOG_ERRO);
+        }
+    }
+    
+    private void parar(){
+        log("# Parando...", LogTipo.LOG_AVISO);
+        servidor.parar();
+        servidor = null;
+        modoInterface(MODO_PARADO);
+        log("Parado!", LogTipo.LOG_SUCESSO);
+    }
+
     
     /**
      * Implementação da interface de callback
      */
     @Override
     public synchronized void clienteConectado(Cliente cliente){
-        
+        String ip = cliente.getConexao().getInetAddress().getHostAddress();
+        log("Nova conexão: " + ip, LogTipo.LOG_AVISO);
     }
     
     @Override
     public synchronized void clienteDesconectado(Cliente cliente){
-        
+        String ip = cliente.getConexao().getInetAddress().getHostAddress();
+        log(cliente.getApelido() + " desconectou-se", LogTipo.LOG_AVISO);        
     }
     
     @Override
     public synchronized void novaMensagem(Cliente cliente, String mensagem){
-        
+        log(cliente.getApelido() + " diz: " + mensagem, LogTipo.LOG_NORMAL);
     }
     
     @Override
-    public synchronized void logServidor(String mensagem){
-        log(mensagem);
+    public synchronized void logServidor(String mensagem, LogTipo tipo){
+        log(mensagem, tipo);
     }
     
     /**
      * Tratamento de eventos
      */
     public void btnIniciarActionPerformed(ActionEvent evt) {                                           
-        // Rotina para teste...
-        log("[Sistema] alternando modo...");
-        if(modoAtual == MODO_PARADO){
-            modoInterface(MODO_INICIADO);
-            log("[Sistema] INICIADO", LOG_AVISO);
-        }else{
-            modoInterface(MODO_PARADO);
-            log("[Sistema] PARADO", LOG_AVISO);
-        }
+        if(!estaIniciado())
+            iniciar();
+        else
+            parar();
     } 
     
 }

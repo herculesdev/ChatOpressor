@@ -1,2 +1,4 @@
 servidor/build
+servidor/dist
 cliente/build
+cliente/dist

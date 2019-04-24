@@ -144,7 +144,7 @@ public class ControladorFrmPrincipal implements IChatCallback {
      */
     @Override
     public synchronized void mensagemRecebida(String mensagem){
-        log(mensagem);
+        log(mensagem, LogTipo.LOG_NORMAL);
     }
     
     public synchronized void logCliente(String mensagem, LogTipo tipo){

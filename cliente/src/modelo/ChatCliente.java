@@ -21,6 +21,8 @@ public class ChatCliente {
     public ChatCliente(IChatCallback callback) throws Exception{
         if(callback == null)
             throw new Exception("Objeto de callback é nulo.");
+        
+        this.callback = callback;
     }
     
     public static boolean portaValida(int porta){
@@ -47,6 +49,15 @@ public class ChatCliente {
             throw new Exception("Porta Inválida");
         
         conexao = new Socket(ip, porta);
+        
+        threadMensagens = new Thread(){
+            @Override
+            public void run(){
+                processaMensagens();
+            }
+        };
+        
+        threadMensagens.start();
     }
     
     public void desconectar() throws IOException{
@@ -89,6 +100,7 @@ public class ChatCliente {
                 if(buffer.ready()){
                     String mensagem = buffer.readLine();
                     callback.mensagemRecebida(mensagem);
+                    System.out.println("recebida...");
                 }
             } catch (IOException ex) {
                 callback.logCliente("[SISTEMA] Falha ao rec. mensagem: " + ex.getMessage(), LogTipo.LOG_ERRO);
