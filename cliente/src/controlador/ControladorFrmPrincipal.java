@@ -6,8 +6,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.awt.event.WindowEvent;
 
 /**
  *
@@ -175,4 +174,11 @@ public class ControladorFrmPrincipal implements IChatCallback {
         if(evt.getKeyCode() == KeyEvent.VK_ENTER)
             btnEnviarActionPerformed(null);
     }
+    
+    public void formWindowClosing(WindowEvent evt) {                                   
+        if(estaConectado())
+            desconecta();
+        
+        Runtime.getRuntime().exit(0);
+    }  
 }

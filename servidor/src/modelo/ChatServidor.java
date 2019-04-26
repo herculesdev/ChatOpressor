@@ -56,6 +56,9 @@ public class ChatServidor {
     }
     
     private int numConexoes(){
+        if(clientes == null)
+            return 0;
+        
         return clientes.size();
     }
         
@@ -65,7 +68,7 @@ public class ChatServidor {
         
         try {
             cliente.getConexao().close();
-            cliente.getProcessaMensagens().interrupt();
+            cliente.getThreadMensagens().interrupt();
             clientes.remove(cliente);
         } catch (IOException ex) {
             System.out.println("[desconectarCliente] falha: " + ex.getMessage());
@@ -174,7 +177,7 @@ public class ChatServidor {
                 };
                 processaMensagens.start();
                 
-                cliente.setProcessaMensagens(processaMensagens);
+                cliente.setThreadMensagens(processaMensagens);
                 clientes.add(cliente);
                 callback.clienteConectado(cliente);
                 contadorId++;

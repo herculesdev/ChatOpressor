@@ -3,6 +3,7 @@ package controlador;
 import visao.FrmPrincipal;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
 import modelo.*;
 
 /**
@@ -157,5 +158,12 @@ public class ControladorFrmPrincipal implements IChatCallback{
         else
             parar();
     } 
+    
+    public void formWindowClosing(WindowEvent evt) {                                   
+        if(estaIniciado())
+            parar();
+        
+        Runtime.getRuntime().exit(0);
+    }   
     
 }

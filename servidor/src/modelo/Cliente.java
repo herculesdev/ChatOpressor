@@ -10,7 +10,7 @@ public class Cliente {
     private int id;
     private String apelido;
     private Socket conexao;
-    private Thread processaMensagens;
+    private Thread threadMensagens;
     
     public Cliente(int id, String apelido, Socket conexao){
         this.id = id;
@@ -42,12 +42,12 @@ public class Cliente {
         this.conexao = conexao;
     }
 
-    public Thread getProcessaMensagens() {
-        return processaMensagens;
+    public Thread getThreadMensagens() {
+        return threadMensagens;
     }
 
-    public void setProcessaMensagens(Thread processaMensagens) {
-        this.processaMensagens = processaMensagens;
+    public void setThreadMensagens(Thread processaMensagens) {
+        this.threadMensagens = processaMensagens;
     }
     
     
