@@ -1,5 +1,6 @@
 package controlador;
 
+import java.awt.EventQueue;
 import visao.FrmPrincipal;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -78,7 +79,16 @@ public class ControladorFrmPrincipal implements IChatCallback{
         String fechaTag = "</span><br>";
         String texto = abreTag + mensagem + fechaTag;
         logBuffer.append(texto);
-        txtLog.setText(logBuffer.toString());
+        
+        EventQueue.invokeLater(
+            new Runnable(){
+                @Override
+                public void run(){
+                    txtLog.setText(logBuffer.toString());
+                }
+            }
+        );
+        
         
     }
     

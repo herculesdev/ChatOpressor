@@ -102,6 +102,12 @@ public class ChatCliente {
                 BufferedReader buffer = new BufferedReader(new InputStreamReader(conexao.getInputStream(), "UTF8"));
                 if(buffer.ready()){
                     String mensagem = buffer.readLine();
+                    
+                    if(mensagem.equals(CMD_DESCONECTAR)){
+                        callback.servidorFechouConexao();
+                        break;
+                    }
+                    
                     callback.mensagemRecebida(mensagem);
                 }
             } catch (IOException ex) {

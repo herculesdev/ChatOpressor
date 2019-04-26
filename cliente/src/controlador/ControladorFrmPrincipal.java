@@ -1,5 +1,6 @@
 package controlador;
 
+import java.awt.EventQueue;
 import visao.FrmPrincipal;
 import modelo.*;
 import javax.swing.*;
@@ -85,7 +86,14 @@ public class ControladorFrmPrincipal implements IChatCallback {
         String fechaTag = "</span><br>";
         String texto = abreTag + mensagem + fechaTag;
         logBuffer.append(texto);
-        txtLog.setText(logBuffer.toString());
+        EventQueue.invokeLater(
+            new Runnable(){
+                @Override
+                public void run(){
+                    txtLog.setText(logBuffer.toString());
+                }
+            }
+        );
     }
 
     private void log(String mensagem){
@@ -148,6 +156,11 @@ public class ControladorFrmPrincipal implements IChatCallback {
     
     public synchronized void logCliente(String mensagem, LogTipo tipo){
         log(mensagem, tipo);
+    }
+    
+    public synchronized void servidorFechouConexao(){
+        log("Servidor fechou a conexão", LogTipo.LOG_ERRO);
+        desconecta();       
     }
     
     /**

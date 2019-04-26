@@ -61,15 +61,26 @@ public class ChatServidor {
         
         return clientes.size();
     }
-        
+    
+    private void removerDesconectados()
+    {
+        for(int i = 0; i < numConexoes(); i++){
+            if(clientes.get(i).getConexao().isClosed()){
+                clientes.remove(i);
+                i--;                
+            }
+            
+        }
+    }
+    
     private void desconectarCliente(Cliente cliente){
         if(cliente == null)
             return;
         
         try {
+            enviarMensagem(null, cliente, CMD_DESCONECTAR);
             cliente.getConexao().close();
             cliente.getThreadMensagens().interrupt();
-            clientes.remove(cliente);
         } catch (IOException ex) {
             System.out.println("[desconectarCliente] falha: " + ex.getMessage());
         }
@@ -85,6 +96,8 @@ public class ChatServidor {
         {            
             desconectarCliente(clientes.get(i));
         }
+        
+        removerDesconectados();
     }
     
     public void iniciar(String ip, int porta, int maxConexoes) throws IOException, Exception{
@@ -122,13 +135,12 @@ public class ChatServidor {
     }
     
     private void enviarMensagem(Cliente remetente, Cliente destinatario, String mensagem){
-
-        if(remetente == null)
-            return;
         if(destinatario == null)
             return; 
+
+        if(remetente != null)
+           mensagem = remetente.getApelido() + " diz: " + mensagem; 
         
-        mensagem = remetente.getApelido() + " diz: " + mensagem;        
         try {
             PrintWriter saida = new PrintWriter(destinatario.getConexao().getOutputStream(), true);
             saida.println(mensagem); 
