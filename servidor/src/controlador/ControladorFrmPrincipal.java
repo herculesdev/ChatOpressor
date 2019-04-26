@@ -3,8 +3,6 @@ package controlador;
 import visao.FrmPrincipal;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import modelo.*;
 
 /**

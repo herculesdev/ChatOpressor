@@ -16,6 +16,7 @@ import java.util.ArrayList;
  * @author Hércules M.
  */
 public class ChatServidor {
+    private final String CMD_DESCONECTAR = "!#[D_E_S_C]#!";
     private ServerSocket servidor;
     private ArrayList<Cliente> clientes;
     private Thread aceitaConexoes;
@@ -65,6 +66,7 @@ public class ChatServidor {
         try {
             cliente.getConexao().close();
             cliente.getProcessaMensagens().interrupt();
+            clientes.remove(cliente);
         } catch (IOException ex) {
             System.out.println("[desconectarCliente] falha: " + ex.getMessage());
         }
@@ -79,7 +81,6 @@ public class ChatServidor {
         for(int i = 0; i < numConexoes(); i++)
         {            
             desconectarCliente(clientes.get(i));
-            clientes.remove(i);
         }
     }
     
@@ -194,7 +195,14 @@ public class ChatServidor {
             try {
                 BufferedReader buffer = new BufferedReader(new InputStreamReader(cliente.getConexao().getInputStream(), "UTF8"));
                 if(buffer.ready()){
-                    String mensagem = buffer.readLine();                    
+                    String mensagem = buffer.readLine();          
+                    
+                    if(mensagem.equals(CMD_DESCONECTAR)){
+                        callback.clienteDesconectado(cliente);
+                        desconectarCliente(cliente);
+                        break;
+                    }
+                    
                     enviarMensagemTodos(cliente, mensagem);                    
                     callback.novaMensagem(cliente, mensagem);
                 }

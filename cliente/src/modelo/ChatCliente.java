@@ -16,6 +16,7 @@ import java.util.logging.Logger;
  */
 
 public class ChatCliente {
+    private final String CMD_DESCONECTAR = "!#[D_E_S_C]#!";
     private Socket conexao;
     private Thread threadMensagens;
     private IChatCallback callback;
@@ -68,7 +69,9 @@ public class ChatCliente {
         
         if(conexao.isClosed())
             return;
-              
+        
+        enviarMensagem(CMD_DESCONECTAR);
+        
         conexao.close();
         conexao = null;
         
