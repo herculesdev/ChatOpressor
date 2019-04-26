@@ -43,10 +43,21 @@ public class ChatServidor {
         }
     }
     
+    private boolean servidorValido(){
+        if(servidor == null)
+            return false;
+        
+        return !servidor.isClosed();
+    }
+    
+    private boolean limiteConexoesAtingido(){
+        return numConexoes() >= maxConexoes;
+    }
+    
     private int numConexoes(){
         return clientes.size();
     }
-    
+        
     private void desconectarCliente(Cliente cliente){
         if(cliente == null)
             return;
@@ -55,7 +66,7 @@ public class ChatServidor {
             cliente.getConexao().close();
             cliente.getProcessaMensagens().interrupt();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            System.out.println("[desconectarCliente] falha: " + ex.getMessage());
         }
     }
     
@@ -106,6 +117,32 @@ public class ChatServidor {
         
     }
     
+    private void enviarMensagem(Cliente remetente, Cliente destinatario, String mensagem){
+
+        if(remetente == null)
+            return;
+        if(destinatario == null)
+            return; 
+        
+        mensagem = remetente.getApelido() + " diz: " + mensagem;        
+        try {
+            PrintWriter saida = new PrintWriter(destinatario.getConexao().getOutputStream(), true);
+            saida.println(mensagem); 
+        } catch (IOException ex) {
+            callback.logServidor("[SISTEMA] Falha ao env. mensagem: " + ex.getMessage(), LogTipo.LOG_ERRO);
+        }
+    }
+    
+    private void enviarMensagemTodos(Cliente remetente, String mensagem){
+       for(int i = 0; i < numConexoes(); i++) {
+           if(clientes.get(i).equals(remetente))
+               continue;
+           
+        enviarMensagem(remetente, clientes.get(i), mensagem);   
+           
+       }
+    }
+    
     /**
      * Métodos assícronos (será executado em thread paralela)
      */
@@ -113,14 +150,12 @@ public class ChatServidor {
         while(!Thread.currentThread().isInterrupted()){
             
             // Se já atingiu limite de conexões
-            if(numConexoes() >= maxConexoes){
-                synchronized(this){
-                    try {
-                        Thread.currentThread().wait(1500);
-                        continue;
-                    } catch (InterruptedException ex) {
-                        ex.printStackTrace();
-                    }
+            if(limiteConexoesAtingido()){
+                try {
+                    Thread.sleep(500);
+                    continue;
+                } catch (InterruptedException ex) {
+                    System.out.println("[AceitarConexoes] Falha ao esperar: " + ex.getMessage());
                 }
             }
             
@@ -143,7 +178,7 @@ public class ChatServidor {
                 callback.clienteConectado(cliente);
                 contadorId++;
             } catch (IOException ex) {
-                callback.logServidor("Falha ao acc. conexao: " + ex.getMessage(), LogTipo.LOG_ERRO);
+                callback.logServidor("[SISTEMA] Falha ao acc. conexao: " + ex.getMessage(), LogTipo.LOG_ERRO);
             }
         }
     }
@@ -154,54 +189,24 @@ public class ChatServidor {
         if(cliente == null)
             return;
         
-        while(!Thread.currentThread().isInterrupted()){
+        while(!Thread.currentThread().isInterrupted() && servidorValido()){
             
             try {
                 BufferedReader buffer = new BufferedReader(new InputStreamReader(cliente.getConexao().getInputStream(), "UTF8"));
                 if(buffer.ready()){
                     String mensagem = buffer.readLine();                    
-                    enviarMensagemTodos(cliente, mensagem);
+                    enviarMensagemTodos(cliente, mensagem);                    
                     callback.novaMensagem(cliente, mensagem);
                 }
             } catch (IOException ex) {
-                callback.logServidor("Falha ao ler mensagem: " + ex.getMessage(), LogTipo.LOG_ERRO);
+                callback.logServidor("[SISTEMA] Falha ao ler mensagem: " + ex.getMessage(), LogTipo.LOG_ERRO);
             }
             
-                synchronized(this){
-                    try {
-                        Thread.currentThread().wait(900);
-                    } catch (InterruptedException ex) {
-                        System.out.println(ex.getMessage());
-                    }
-                }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
+                System.out.println("[ProcessaMensagens] Erro ao esperar: " + ex.getMessage());
+            }
         }
-    }
-    
-    private void enviarMensagem(Cliente remetente, Cliente destinatario, String mensagem){
-
-        if(remetente == null)
-            return;
-        if(destinatario == null)
-            return; 
-        
-        mensagem = remetente.getApelido() + " diz: " + mensagem;        
-        try {
-            PrintWriter saida = new PrintWriter(destinatario.getConexao().getOutputStream(), true);
-            saida.println(mensagem); 
-            System.out.println("Enviado para: " + destinatario.getApelido());
-        } catch (IOException ex) {
-            callback.logServidor("Falha ao env. mensagem: " + ex.getMessage(), LogTipo.LOG_ERRO);
-        }
-    }
-    
-    private void enviarMensagemTodos(Cliente remetente, String mensagem){
-       for(int i = 0; i < numConexoes(); i++) {
-           if(clientes.get(i).equals(remetente))
-               continue;
-           
-        enviarMensagem(remetente, clientes.get(i), mensagem);   
-           
-       }
-    }
-    
+    }    
 }

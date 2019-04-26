@@ -68,7 +68,7 @@ public class ChatCliente {
         
         if(conexao.isClosed())
             return;
-        
+              
         conexao.close();
         conexao = null;
         
@@ -97,13 +97,6 @@ public class ChatCliente {
     
     private void processaMensagens(){
         while(!Thread.currentThread().isInterrupted()){
-            synchronized(this){
-                try {
-                    Thread.currentThread().wait(900);
-                } catch (InterruptedException ex) {
-                    System.out.println(ex.getMessage());
-                }
-            }
             try {
                 BufferedReader buffer = new BufferedReader(new InputStreamReader(conexao.getInputStream(), "UTF8"));
                 if(buffer.ready()){
@@ -112,6 +105,12 @@ public class ChatCliente {
                 }
             } catch (IOException ex) {
                 callback.logCliente("[SISTEMA] Falha ao rec. mensagem: " + ex.getMessage(), LogTipo.LOG_ERRO);
+            }
+            
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
+                System.out.println("[ProcessaMensagens]Falha ao esperar: " + ex.getMessage());
             }
         }
     }
